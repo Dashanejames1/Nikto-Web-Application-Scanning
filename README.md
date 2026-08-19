@@ -67,9 +67,9 @@ I ran a basic Nikto scan on port 80 of the vulnerable Metasploitable server (whi
 <img width="323" height="257" alt="Screenshot 2026-08-16 132532" src="https://github.com/user-attachments/assets/befafe39-6b48-4501-8ae2-5621ae5a14b4" />
 
 Output
-Command first displays data about the target such as the target's IP, hostname, port number, platform, and time the scan was executed. Next, the exact web server being used is displayed, followed by several vulnerabilities found in the target's web sever. The exact method in which an attacker might exploit these vulnerabilities is explained as well. In total, their was 8244 requests(what kind of requests?, 30 findings, 18 errors, and 1 host tested.
+Command first displays data about the target such as the target's IP, hostname, port number, platform, and time the scan was executed. Next, the exact web server being used is displayed, followed by several vulnerabilities found in the target's web sever. The exact method in which an attacker might exploit these vulnerabilities is explained as well. In total, their was 8244 requests, 30 findings, 18 errors, and 1 host tested.
 
-Findings: Overall,  what i found was that the target's web server was essentially an unpatched and over-exposed target with no meaningful hardening at the web server level. I discovered that the web sever appears to be running outdated software such as Apache 2.2.8 and PHP 5.2.4, with nearly the entire header set missing (the instructions the server sends to the browser telling it to enforce extra safety rules.). I also found multiple information-disclosure issues, several browsable directories, and the server has mod_negotiation/MultiViews(An Apache feature that auto picks the best matching file when a request doesn't specify an extension.) enabled, and HTTP TRACE was also active (an XST Risk ???) 
+Findings: Overall,  what i found was that the target's web server was essentially an unpatched and over-exposed target with no meaningful hardening at the web server level. I discovered that the web sever appears to be running outdated software such as Apache 2.2.8 and PHP 5.2.4, with nearly the entire header set missing (the instructions the server sends to the browser telling it to enforce extra safety rules.). I also found multiple information-disclosure issues, several browsable directories, and the server has mod_negotiation/MultiViews(An Apache feature that auto picks the best matching file when a request doesn't specify an extension.) enabled, and HTTP TRACE was also active.
 
 2. [Save Results to a file]
 [Use command prompt to save the results from the Nikto scan that was performed in the previous task onto a file that can be accessed whenever needed.]
@@ -89,25 +89,33 @@ Finding:
 Nikto created a double extension (nikto_reslts.txt.txt) because Nikto adds its own file extension to the end regardless of what was already typed.
 I found Nikto gives no confirmation message that the save succeeded, so verifying the file afterward is a necessary step rather than an option.
 
-3. [Look up two vulnerabilities that Nikto finds]
-[Brief description of what you did and why]
+3. Look up two vulnerabilities that Nikto finds
+   
+I Researched three of the vulnerabilities found in the Nikto scan. This gave me a better understanding of the types of vulnerabilities that are open in Metaspoloitable. It also gave me an understanding on how and why they are exploited.
+
+
+Research Summary 
+
+Outdated/EOL software (Ex: Apache 2.2.8, PHP 5.2.4) - Not a specific CVE, but it's the single most common category of vulnerability finding in the industry. The cause and dangers are pretty straight forward in that once a version of software becomes outdated/EOL there are no longer any patches being made to protect it from new attacks which leaves the software completely vulnerable. What makes this vulnerability one of the most dangerous is that an attacker doesn't have to find anything new they can just look up known, already documented exploits for the specific version and use them directly.
+
+HTTP TRACE/Cross-site Tracing (XST) - OWASP-documented attack class that shows up constantly in real pen test reports, compliance scans (PCI-DSS specifically flags TRACE), and security training material. TRACE is a legitimate, built-in web server debugging feature. When activated, the server just echoes the exact request it received right back to the sender including all headers. The danger comes when its paired with a separate more common flaw called XSS, where an attacker manages to get malicious code to run inside a victims browser on that site. Since TRACE echoes the original request back, cookies included, and injected script is allowed to read that echoed response. So TRACE essentially hands the attacker a side door around a browser protection that's supposed to be unbreakable.
+
+mod_negotiations/MultiViews - A built in Apache feature that checks for which file you meant when a file doesn't specify an exact name/path. It exists purely for convenience, so a link doesn't crash a site if a site quietly switches from .html to .php and so on. However, this convenient feature becomes a discovery tool in the wrong hands. An attacker can utilize this tool to receive a yes or no response to whether or not a file exists on the sever, rather than the usual "not found" response. This is concerning because an attacker can continuously guess file names until the server confirms if it exists or not.
+
+4. [Compare Nikto results vs Nmap results]
+[In this task, I compared the result i got from running a Nikto scan to the results I received when running Nmap to find vulnerabilities in the same target Metasploitable machine. I did this to understand what each tool is actually built to find and how they can complement or differentiate from each other in a real assessment.]
 
 # Command used
-[your command here]
+[nikto -h 192.168.79.130]
+[sudo nmap -sV -Pn --disable-arp-ping -n -p 21,22,23,80,3306 192.168.79.130]
+[sudo nmap --script ftp-anon -Pn --disable -arp-ping -n -p 21 192.168.79.130]
+sudo nmap --script smb-vuln* -Pn --disable -arp-ping -n -p 445 21 192.168.79.130
 
 Output
+In terms of finding vulnerabilities, Nikto stayed scoped entirely to port 80, finding application-layer issues: outdated Apache/PHP, missing headers, browsable directories, exposed phpMyAdmin, and TRACE/XST. While Nmap covered the whole host, finding anonymous FTP on vsftpd 2.3.4, cleartext Telnet, weak SMB config, and exposed MySQL. Both tools independently fingerprinted the same Apache version. 
 
-Finding: [What did you discover?]
 
-4. [Task Name]
-[Brief description of what you did and why]
-
-# Command used
-[your command here]
-
-Output
-
-Finding: [What did you discover?]
+Finding: I found that Nmap and Nikto cover different scopes. I also found that Nmap isn't tied to any specific protocol, it surveys the whole host against any service. While Nikto is a specialist that only speaks HTTP/HTTPS and digs deep into it. Also when using Nmap, I had to specifically add ftp-anon and smb-vuln* to run these vulnerability checks while Nikto automatically runs it's entire signature database the moment you launch it. That difference is what led to me to be able to use nmap to find vsftpd 2.3.4, a  vulnerability with a known backdoor, which is far more severe than anything found on port 80 using Nikto even if only the version was confirmed and not an actual exploit.
 
 📊 Key Findings Summary
 Port/Service	Tool Used	Risk Level	Notes
@@ -165,6 +173,8 @@ FTP VS SMB - ftp moves files between two points. SMB is the dominant protocol fo
 The Server Message Block (SMB) protocol - is a client-server network communication protocol used to share files, printers, and serial ports across a local network. It lets a user open, read, write, and manage files on a remote computer or server as if those files lived on their own local hard drive.
 
 HTTP TRACE - A debugging method that echoes your request straight back to you (headers included.) Which when paired with an XSS vulnerability can possibly become an even bigger vulnerability.
+
+Cross-site Scripting(XSS) - 
 
 # Any important commands or workarounds
 [command here]
