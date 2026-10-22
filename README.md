@@ -1,9 +1,9 @@
 # 🔍 Nikto-Web-Application-Scanning
 
 **Author:** Dashane James  
-**Lab Environment:** [e.g. VMware Workstation | Kali Linux | Metasploitable 2]  
+**Lab Environment:** VMware Workstation | Kali Linux | Metasploitable 2 
 **Purpose:** The goal in this repository is to use Nikto Web Application scanner to scan Metasploitable's web server in order to identify, document, and study vulnerabilities.  
-**Status:** 🟢 Active / 🟡 In Progress / 🔵 Completed
+**Status:** 🔵 Completed
 
 ---
 
@@ -34,31 +34,16 @@ This repository documents a series of 4 assessments performed in my isolated VMw
 
 ---
 
-## 📁 Repository Structure
-
-```
-[Repo-Name]/
-├── README.md
-├── [folder-1]/
-│   ├── [file1.txt]        # Description of file
-│   └── [file2.md]         # Description of file
-├── [folder-2]/
-│   ├── [file3.md]         # Description of file
-│   └── [file4.txt]        # Description of file
-└── reports/
-    └── [final-report.md]  # Full assessment report
-```
-
 ---
 
 ## 🔬 Tasks / Assessments Performed
 
 ###1. Run a basic Nikto scan against port 80
 
-I ran a basic Nikto scan on port 80 of the vulnerable Metasploitable server (which is the default port when using Nikto). I then recorded and reviewed the results. )
+I ran a basic Nikto scan on port 80 of the vulnerable Metasploitable server (which is the default port when using Nikto). I then recorded and reviewed the results. 
 
 # Command used
-[nikto -h 192.168.79.130]
+nikto -h 192.168.79.130
 
 <img width="322" height="256" alt="Screenshot 2026-08-16 132425" src="https://github.com/user-attachments/assets/71f95ab4-bb16-47b7-9b3c-306d6fc28448" />
 
@@ -67,25 +52,31 @@ I ran a basic Nikto scan on port 80 of the vulnerable Metasploitable server (whi
 <img width="323" height="257" alt="Screenshot 2026-08-16 132532" src="https://github.com/user-attachments/assets/befafe39-6b48-4501-8ae2-5621ae5a14b4" />
 
 Output
+
 Command first displays data about the target such as the target's IP, hostname, port number, platform, and time the scan was executed. Next, the exact web server being used is displayed, followed by several vulnerabilities found in the target's web sever. The exact method in which an attacker might exploit these vulnerabilities is explained as well. In total, their was 8244 requests, 30 findings, 18 errors, and 1 host tested.
 
-Findings: Overall,  what i found was that the target's web server was essentially an unpatched and over-exposed target with no meaningful hardening at the web server level. I discovered that the web sever appears to be running outdated software such as Apache 2.2.8 and PHP 5.2.4, with nearly the entire header set missing (the instructions the server sends to the browser telling it to enforce extra safety rules.). I also found multiple information-disclosure issues, several browsable directories, and the server has mod_negotiation/MultiViews(An Apache feature that auto picks the best matching file when a request doesn't specify an extension.) enabled, and HTTP TRACE was also active.
+Findings: 
 
-2. [Save Results to a file]
-[Use command prompt to save the results from the Nikto scan that was performed in the previous task onto a file that can be accessed whenever needed.]
+Overall,  what i found was that the target's web server was essentially an unpatched and over-exposed target with no meaningful hardening at the web server level. I discovered that the web sever appears to be running outdated software such as Apache 2.2.8 and PHP 5.2.4, with nearly the entire header set missing (the instructions the server sends to the browser telling it to enforce extra safety rules.). I also found multiple information-disclosure issues, several browsable directories, and the server has mod_negotiation/MultiViews(An Apache feature that auto picks the best matching file when a request doesn't specify an extension.) enabled, and HTTP TRACE was also active.
+
+2. Save Results to a file
+   
+Use command prompt to save the results from the Nikto scan that was performed in the previous task onto a file that can be accessed whenever needed.
 
 # Commands used
-[nikto -h 192.168.79.130 -p 80 -o ~/nikto_reslts.txt]
-[cat ~/nikto_reslts.txt.txt]
+nikto -h 192.168.79.130 -p 80 -o ~/nikto_reslts.txt
+cat ~/nikto_reslts.txt.txt
 
 <img width="326" height="257" alt="Screenshot 2026-08-16 222906" src="https://github.com/user-attachments/assets/fbb4f2e4-1517-46b8-ada5-bcf1d64f33a1" />
 
 <img width="326" height="259" alt="Screenshot 2026-08-16 222825" src="https://github.com/user-attachments/assets/814b4678-4e7f-48ae-8900-dbbab5cd6f1e" />
 
 Output
+
 The output in the first screenshot shows the web vulnerability scan being run on the Metasploitable server and the command requests for the results to be saved to file "nikto_reslts.txt". However, Nikto actually saved the file as "nikto_reslts.txt.txt" because it adds its own format extension regardless of what was typed. The second screenshot shows the cat command accessing and displaying the contents of nikto_reslts.txt.txt.
 
-Finding: 
+Findings: 
+
 Nikto created a double extension (nikto_reslts.txt.txt) because Nikto adds its own file extension to the end regardless of what was already typed.
 I found Nikto gives no confirmation message that the save succeeded, so verifying the file afterward is a necessary step rather than an option.
 
@@ -102,20 +93,24 @@ HTTP TRACE/Cross-site Tracing (XST) - OWASP-documented attack class that shows u
 
 mod_negotiations/MultiViews - A built in Apache feature that checks for which file you meant when a file doesn't specify an exact name/path. It exists purely for convenience, so a link doesn't crash a site if a site quietly switches from .html to .php and so on. However, this convenient feature becomes a discovery tool in the wrong hands. An attacker can utilize this tool to receive a yes or no response to whether or not a file exists on the sever, rather than the usual "not found" response. This is concerning because an attacker can continuously guess file names until the server confirms if it exists or not.
 
-4. [Compare Nikto results vs Nmap results]
-[In this task, I compared the result i got from running a Nikto scan to the results I received when running Nmap to find vulnerabilities in the same target Metasploitable machine. I did this to understand what each tool is actually built to find and how they can complement or differentiate from each other in a real assessment.]
+4. Compare Nikto results vs Nmap results
+In this task, I compared the result i got from running a Nikto scan to the results I received when running Nmap to find vulnerabilities in the same target Metasploitable machine. I did this to understand what each tool is actually built to find and how they can complement or differentiate from each other in a real assessment.
 
-# Command used
-[nikto -h 192.168.79.130]
-[sudo nmap -sV -Pn --disable-arp-ping -n -p 21,22,23,80,3306 192.168.79.130]
-[sudo nmap --script ftp-anon -Pn --disable -arp-ping -n -p 21 192.168.79.130]
+# Commands used
+
+nikto -h 192.168.79.130
+sudo nmap -sV -Pn --disable-arp-ping -n -p 21,22,23,80,3306 192.168.79.130
+sudo nmap --script ftp-anon -Pn --disable -arp-ping -n -p 21 192.168.79.130
 sudo nmap --script smb-vuln* -Pn --disable -arp-ping -n -p 445 21 192.168.79.130
 
 Output
+
 In terms of finding vulnerabilities, Nikto stayed scoped entirely to port 80, finding application-layer issues: outdated Apache/PHP, missing headers, browsable directories, exposed phpMyAdmin, and TRACE/XST. While Nmap covered the whole host, finding anonymous FTP on vsftpd 2.3.4, cleartext Telnet, weak SMB config, and exposed MySQL. Both tools independently fingerprinted the same Apache version. 
 
 
-Finding: I found that Nmap and Nikto cover different scopes. I also found that Nmap isn't tied to any specific protocol, it surveys the whole host against any service. While Nikto is a specialist that only speaks HTTP/HTTPS and digs deep into it. Also when using Nmap, I had to specifically add ftp-anon and smb-vuln* to run these vulnerability checks while Nikto automatically runs it's entire signature database the moment you launch it. That difference is what led to me to be able to use nmap to find vsftpd 2.3.4, a  vulnerability with a known backdoor, which is far more severe than anything found on port 80 using Nikto even if only the version was confirmed and not an actual exploit.
+Finding: 
+
+I found that Nmap and Nikto cover different scopes. I also found that Nmap isn't tied to any specific protocol, it surveys the whole host against any service. While Nikto is a specialist that only speaks HTTP/HTTPS and digs deep into it. Also when using Nmap, I had to specifically add ftp-anon and smb-vuln* to run these vulnerability checks while Nikto automatically runs it's entire signature database the moment you launch it. That difference is what led to me to be able to use nmap to find vsftpd 2.3.4, a  vulnerability with a known backdoor, which is far more severe than anything found on port 80 using Nikto even if only the version was confirmed and not an actual exploit.
 
 📊 Key Findings Summary
 Port/Service	Tool Used	Risk Level	Notes
@@ -145,13 +140,9 @@ Based on findings, the following remediations would be recommended in a real env
 📚 CySA+ Exam Relevance
 This lab directly maps to the following CompTIA CySA+ (CS0-003) exam domains:
 
-Domain	Coverage
-Security Operations (33%)	[What this lab covers in this domain]
-Vulnerability Management (30%)	[What this lab covers in this domain]
-Incident Response (20%)	[What this lab covers in this domain]
-Reporting & Communication (17%)	[What this lab covers in this domain]
+
 🔑 Technical Notes
-[Any important notes about your lab setup, workarounds, or lessons learned. Example:
+
 
 APACHE - The web server software itself. It is the program listening  on port 80 that receves a browser's request and sends back the response. AKA the delivery engine.
 
@@ -177,18 +168,14 @@ HTTP TRACE - A debugging method that echoes your request straight back to you (h
 Cross-site Scripting(XSS) - 
 
 # Any important commands or workarounds
-[command here]
+
 ls -la ~/ | grep -i nikto
 -o 
 cat
+
 📌 About This Project
 [1-2 sentences about how this fits into your overall portfolio and career goals.]
 
-Related repositories:
-
-[Repo Name] — [Brief description]
-[Repo Name] — [Brief description]
-[Repo Name] — Coming soon
 👤 Author
 Dashane James
 Senior Field Service Technician → Cybersecurity Analyst
